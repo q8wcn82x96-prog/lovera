@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Caveat, Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -12,6 +12,13 @@ const display = Cormorant_Garamond({
 const sans = Manrope({
   variable: "--font-manrope",
   subsets: ["latin", "cyrillic"],
+});
+
+// Рукописный шрифт: заголовок-кисть (700) и пометки на коллаже (400–500)
+const hand = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ru" className={`${display.variable} ${sans.variable} h-full antialiased`}>
+    <html lang="ru" className={`${display.variable} ${sans.variable} ${hand.variable} h-full antialiased`}>
       <body className="min-h-full bg-ink font-sans text-milk">{children}</body>
     </html>
   );

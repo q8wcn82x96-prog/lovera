@@ -1,0 +1,484 @@
+/* Первый экран на весь вьюпорт, без полей */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+}
+
+/*
+ * Сцена 16:9 покрывает вьюпорт (как object-fit: cover) и центрирована.
+ * Изображение и кликабельные зоны лежат внутри одной сцены, поэтому при любом
+ * масштабе и обрезке зоны остаются точно над нарисованными кнопками.
+ * При 1920×1080 сцена совпадает с вьюпортом один в один.
+ */
+.scene {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, 100dvh * 16 / 9);
+  aspect-ratio: 16 / 9;
+  transform: translate(-50%, -50%);
+  /* 1px сцены при 1920×1080 — эффекты масштабируются вместе с изображением */
+  --u: calc(max(100vw, 100dvh * 16 / 9) / 1920);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+/* ---------- Парящий конверт ----------
+   Отдельный прозрачный слой поверх фона без конверта. Движение запускается само
+   при загрузке и не зависит от курсора. Траектория — плавная замкнутая кривая
+   (много ключевых кадров + linear), поэтому нет остановок и рывка на стыке цикла. */
+.envelopeGroup {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: 50% 55%;
+  will-change: transform;
+  animation: envelope-float 6.5s linear infinite;
+}
+
+.envelopeImg {
+  user-select: none;
+}
+
+/* Мягкая тень на «поверхности» под конвертом: в покое невидима,
+   когда конверт поднимается — чуть проявляется и расплывается */
+.envelopeShadow {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -2%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.55), transparent);
+  opacity: 0;
+  pointer-events: none;
+  animation: envelope-shadow 6.5s linear infinite;
+}
+
+@keyframes envelope-float {
+  0.00% { transform: translate3d(calc(0.00 * var(--u)), calc(0.00 * var(--u)), 0) rotate(0.000deg); }
+  4.17% { transform: translate3d(calc(2.56 * var(--u)), calc(-0.91 * var(--u)), 0) rotate(0.153deg); }
+  8.33% { transform: translate3d(calc(4.80 * var(--u)), calc(-2.25 * var(--u)), 0) rotate(0.280deg); }
+  12.50% { transform: translate3d(calc(6.45 * var(--u)), calc(-3.84 * var(--u)), 0) rotate(0.362deg); }
+  16.67% { transform: translate3d(calc(7.36 * var(--u)), calc(-5.54 * var(--u)), 0) rotate(0.390deg); }
+  20.83% { transform: translate3d(calc(7.51 * var(--u)), calc(-7.27 * var(--u)), 0) rotate(0.365deg); }
+  25.00% { transform: translate3d(calc(7.00 * var(--u)), calc(-9.00 * var(--u)), 0) rotate(0.300deg); }
+  29.17% { transform: translate3d(calc(6.01 * var(--u)), calc(-10.73 * var(--u)), 0) rotate(0.215deg); }
+  33.33% { transform: translate3d(calc(4.76 * var(--u)), calc(-12.46 * var(--u)), 0) rotate(0.130deg); }
+  37.50% { transform: translate3d(calc(3.45 * var(--u)), calc(-14.16 * var(--u)), 0) rotate(0.062deg); }
+  41.67% { transform: translate3d(calc(2.20 * var(--u)), calc(-15.75 * var(--u)), 0) rotate(0.020deg); }
+  45.83% { transform: translate3d(calc(1.06 * var(--u)), calc(-17.09 * var(--u)), 0) rotate(0.003deg); }
+  50.00% { transform: translate3d(calc(0.00 * var(--u)), calc(-18.00 * var(--u)), 0) rotate(0.000deg); }
+  54.17% { transform: translate3d(calc(-1.06 * var(--u)), calc(-18.29 * var(--u)), 0) rotate(-0.003deg); }
+  58.33% { transform: translate3d(calc(-2.20 * var(--u)), calc(-17.83 * var(--u)), 0) rotate(-0.020deg); }
+  62.50% { transform: translate3d(calc(-3.45 * var(--u)), calc(-16.56 * var(--u)), 0) rotate(-0.062deg); }
+  66.67% { transform: translate3d(calc(-4.76 * var(--u)), calc(-14.54 * var(--u)), 0) rotate(-0.130deg); }
+  70.83% { transform: translate3d(calc(-6.01 * var(--u)), calc(-11.93 * var(--u)), 0) rotate(-0.215deg); }
+  75.00% { transform: translate3d(calc(-7.00 * var(--u)), calc(-9.00 * var(--u)), 0) rotate(-0.300deg); }
+  79.17% { transform: translate3d(calc(-7.51 * var(--u)), calc(-6.07 * var(--u)), 0) rotate(-0.365deg); }
+  83.33% { transform: translate3d(calc(-7.36 * var(--u)), calc(-3.46 * var(--u)), 0) rotate(-0.390deg); }
+  87.50% { transform: translate3d(calc(-6.45 * var(--u)), calc(-1.44 * var(--u)), 0) rotate(-0.362deg); }
+  91.67% { transform: translate3d(calc(-4.80 * var(--u)), calc(-0.17 * var(--u)), 0) rotate(-0.280deg); }
+  95.83% { transform: translate3d(calc(-2.56 * var(--u)), calc(0.29 * var(--u)), 0) rotate(-0.153deg); }
+  100.00% { transform: translate3d(calc(-0.00 * var(--u)), calc(0.00 * var(--u)), 0) rotate(-0.000deg); }
+}
+
+/* Тень двигается против подъёма конверта: остаётся внизу, становится шире и мягче */
+@keyframes envelope-shadow {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scaleX(0.96);
+  }
+  50% {
+    opacity: 0.32;
+    transform: translate3d(0, calc(18 * var(--u)), 0) scaleX(1.06);
+  }
+}
+
+/* ---------- Лента: собственное колыхание поверх общего парения группы ----------
+   Петли — дети парящей группы (конверт + лента), поэтому базовое движение у них общее.
+   Сверху каждая петля «дышит»: поворачивается вокруг точки, где встречается с конвертом
+   (кончик смещается на 4–7px при 1920×1080, стык не рвётся), чуть смещается и меняет свечение.
+   ribbon-back (левая и верхняя петли) — 5.3s, ribbon-front (правая петля) — 4.6s. */
+.loop {
+  position: absolute;
+  will-change: transform, filter;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.ribbonBack {
+  animation-name: ribbon-back;
+  animation-duration: 5.3s;
+}
+
+.ribbonFront {
+  animation-name: ribbon-front;
+  animation-duration: 4.6s;
+}
+
+@keyframes ribbon-back {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1);
+    filter: brightness(1) drop-shadow(0 0 0 rgb(255 40 120 / 0));
+    opacity: 1;
+  }
+  27% {
+    transform: translate3d(calc(1.5 * var(--u)), calc(-1 * var(--u)), 0) rotate(2.4deg) scaleX(1.005);
+    filter: brightness(1.12) drop-shadow(0 0 calc(6 * var(--u)) rgb(255 40 120 / 0.55));
+    opacity: 1;
+  }
+  55% {
+    transform: translate3d(calc(-1 * var(--u)), calc(1 * var(--u)), 0) rotate(-1.4deg) scaleX(0.995);
+    filter: brightness(0.95) drop-shadow(0 0 calc(2 * var(--u)) rgb(255 40 120 / 0.2));
+    opacity: 0.9;
+  }
+  80% {
+    transform: translate3d(calc(0.5 * var(--u)), calc(-0.5 * var(--u)), 0) rotate(1deg) scaleX(1.002);
+    filter: brightness(1.05) drop-shadow(0 0 calc(4 * var(--u)) rgb(255 40 120 / 0.35));
+    opacity: 0.96;
+  }
+}
+
+@keyframes ribbon-front {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1);
+    filter: brightness(1) drop-shadow(0 0 0 rgb(255 40 120 / 0));
+    opacity: 1;
+  }
+  30% {
+    transform: translate3d(calc(1.5 * var(--u)), calc(1.5 * var(--u)), 0) rotate(-2.4deg) scaleX(0.995);
+    filter: brightness(0.95) drop-shadow(0 0 calc(2 * var(--u)) rgb(255 40 120 / 0.2));
+    opacity: 0.92;
+  }
+  62% {
+    transform: translate3d(calc(-1 * var(--u)), calc(-1 * var(--u)), 0) rotate(1.8deg) scaleX(1.005);
+    filter: brightness(1.12) drop-shadow(0 0 calc(6 * var(--u)) rgb(255 40 120 / 0.55));
+    opacity: 1;
+  }
+  84% {
+    transform: translate3d(calc(0.5 * var(--u)), 0, 0) rotate(-0.6deg) scaleX(1);
+    filter: brightness(1.02) drop-shadow(0 0 calc(3 * var(--u)) rgb(255 40 120 / 0.3));
+    opacity: 0.97;
+  }
+}
+
+/* ---------- Неон сцены: заметное, но мягкое независимое «дыхание» ----------
+   Под каждым оверлеем неон в фоне приглушён на 35%: opacity 1 = исходная яркость,
+   0.35 ≈ 77%. Яркие фазы и редкие импульсы — brightness самого оверлея (до 1.25).
+   Четыре группы с разными периодами + у каждого элемента своя отрицательная задержка. */
+.neon {
+  position: absolute;
+  pointer-events: none;
+  will-change: opacity, filter;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* NEON LEFT: корона, красное стекло, кассета */
+.neonLeft {
+  animation-name: neon-left;
+  animation-duration: 4.3s;
+}
+
+/* NEON PHOTO: сердце на городском фото, звезда, стеклянное сердце */
+.neonPhoto {
+  animation-name: neon-photo;
+  animation-duration: 5.7s;
+}
+
+/* NEON RIGHT: сердце у фотополоски, сердце на экране телефона */
+.neonRight {
+  animation-name: neon-right;
+  animation-duration: 6.4s;
+}
+
+/* SMALL NEON ACCENTS: маленькое сердце, подвеска, сердце в углу */
+.neonSmall {
+  animation-name: neon-small;
+  animation-duration: 3.8s;
+}
+
+@keyframes neon-left {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  25% {
+    opacity: 1;
+    filter: brightness(1.15);
+  }
+  42% {
+    opacity: 0.8;
+    filter: brightness(1);
+  }
+  46% {
+    opacity: 0.4;
+    filter: brightness(0.9);
+  }
+  49% {
+    opacity: 1;
+    filter: brightness(1.25);
+  }
+  53% {
+    opacity: 0.85;
+    filter: brightness(1);
+  }
+  78% {
+    opacity: 1;
+    filter: brightness(1.12);
+  }
+}
+
+@keyframes neon-photo {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  30% {
+    opacity: 0.45;
+    filter: brightness(0.9);
+  }
+  58% {
+    opacity: 1;
+    filter: brightness(1.2);
+  }
+  76% {
+    opacity: 0.7;
+    filter: brightness(1);
+  }
+}
+
+@keyframes neon-right {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  20% {
+    opacity: 1;
+    filter: brightness(1.18);
+  }
+  48% {
+    opacity: 0.45;
+    filter: brightness(0.88);
+  }
+  66% {
+    opacity: 0.4;
+    filter: brightness(0.85);
+  }
+  69% {
+    opacity: 1;
+    filter: brightness(1.25);
+  }
+  73% {
+    opacity: 0.8;
+    filter: brightness(1);
+  }
+  90% {
+    opacity: 1;
+    filter: brightness(1.08);
+  }
+}
+
+@keyframes neon-small {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  35% {
+    opacity: 0.5;
+    filter: brightness(0.9);
+  }
+  62% {
+    opacity: 1;
+    filter: brightness(1.22);
+  }
+  82% {
+    opacity: 0.75;
+    filter: brightness(1);
+  }
+}
+
+/* Прозрачная кликабельная зона поверх нарисованного элемента.
+   В покое ничего не видно: весь свет — в ::before (hover) и .flash (клик), оба без pointer-events. */
+.hit {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hit:focus-visible {
+  outline: 2px solid #ff3d86;
+  outline-offset: 3px;
+}
+
+.hit::before,
+.flash {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Hover-свечение: светится сама нарисованная кнопка */
+.hit::before {
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition:
+    opacity 220ms ease-out,
+    transform 100ms ease-out,
+    box-shadow 220ms ease-out;
+}
+
+.hit:hover::before,
+.hit:focus-visible::before {
+  opacity: 1;
+}
+
+/* ---------- Главные CTA ---------- */
+
+.cta::before {
+  background: rgb(255 30 110 / 0.14);
+  box-shadow:
+    0 0 calc(15 * var(--u)) rgb(255 30 110 / 0.35),
+    0 0 calc(35 * var(--u)) rgb(255 20 100 / 0.2);
+}
+
+.cta:active::before {
+  opacity: 1;
+  transform: scale(0.98);
+  background: rgb(255 40 120 / 0.22);
+  box-shadow:
+    0 0 calc(20 * var(--u)) rgb(255 40 120 / 0.8),
+    0 0 calc(45 * var(--u)) rgb(255 20 100 / 0.45),
+    0 0 calc(70 * var(--u)) rgb(255 0 90 / 0.2);
+}
+
+/* Вспышка при клике: яркий розовый импульс, расходится волной и гаснет */
+.flash {
+  mix-blend-mode: screen;
+  animation: neon-flash 420ms ease-out forwards;
+}
+
+.cta .flash {
+  --flash-scale: 1.14;
+  --flash-glow:
+    0 0 calc(20 * var(--u)) rgb(255 40 120 / 0.8),
+    0 0 calc(45 * var(--u)) rgb(255 20 100 / 0.45),
+    0 0 calc(70 * var(--u)) rgb(255 0 90 / 0.2);
+}
+
+@keyframes neon-flash {
+  0% {
+    opacity: 1;
+    transform: scale(0.98);
+    background: rgb(255 60 140 / 0.3);
+    box-shadow: var(--flash-glow);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(var(--flash-scale, 1.1));
+    background: rgb(255 60 140 / 0);
+    box-shadow: var(--flash-glow);
+  }
+}
+
+/* ---------- Кнопки на экране телефона: слабее и компактнее ---------- */
+
+.phoneBtn::before {
+  inset: calc(2 * var(--u));
+  background: rgb(255 30 110 / 0.1);
+  box-shadow: 0 0 calc(8 * var(--u)) rgb(255 30 110 / 0.35);
+}
+
+.phoneBtn:active::before {
+  opacity: 1;
+  transform: scale(0.98);
+  box-shadow: 0 0 calc(12 * var(--u)) rgb(255 40 120 / 0.7);
+}
+
+.phoneBtn .flash {
+  --flash-scale: 1.06;
+  --flash-glow: 0 0 calc(12 * var(--u)) rgb(255 40 120 / 0.7);
+}
+
+/* ---------- Навигация: тонкая светящаяся линия под текстом ---------- */
+
+.nav {
+  border-radius: 0;
+}
+
+.nav::before {
+  inset: auto 4% calc(-5 * var(--u));
+  height: calc(1.5 * var(--u));
+  border-radius: 999px;
+  background: rgb(255 70 140 / 0.9);
+  box-shadow:
+    0 0 calc(6 * var(--u)) rgb(255 40 120 / 0.7),
+    0 calc(-4 * var(--u)) calc(14 * var(--u)) rgb(255 40 120 / 0.25);
+  transform: scaleX(0.6);
+}
+
+.nav:hover::before,
+.nav:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.nav .flash {
+  display: none;
+}
+
+/* ---------- Логотип: едва заметная неоновая подсветка ---------- */
+
+.logo {
+  display: block;
+  border-radius: calc(12 * var(--u));
+}
+
+.logo::before {
+  inset: 10% 2%;
+  border-radius: 50%;
+  background: rgb(255 40 120 / 0.06);
+  box-shadow: 0 0 calc(18 * var(--u)) rgb(255 40 120 / 0.22);
+  filter: blur(calc(2 * var(--u)));
+}
+
+/* Без анимации: только статичное hover-свечение, без вспышки и масштаба */
+@media (prefers-reduced-motion: reduce) {
+  .hit::before {
+    transition: none;
+  }
+  .hit:active::before,
+  .nav::before {
+    transform: none;
+  }
+  .flash {
+    display: none;
+  }
+  .envelopeGroup,
+  .envelopeShadow,
+  .loop,
+  .neon {
+    animation: none;
+  }
+}
